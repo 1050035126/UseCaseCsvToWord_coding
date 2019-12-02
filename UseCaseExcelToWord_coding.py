@@ -20,6 +20,7 @@ python环境:
 
 import re
 import os
+import sys
 from docx import Document
 from docx.shared import Pt
 from docx.oxml.ns import qn
@@ -101,10 +102,10 @@ def confirmUniqueSignal(signal):
             break
 
     if signalArray[1] == 0:
-        print(signal)
+        # print(signal)
         return signal
     else:
-        print(signal + str(signalArray[1]))
+        # print(signal + str(signalArray[1]))
         return signal + str(signalArray[1])
 
 
@@ -237,7 +238,12 @@ def generateCaseTable(doc, useCaseList, projectName, caseIndex1, caseIndex2):
                     "测试用例中的入口对应的就是菜单项。",
                     12, "宋体", fontBold=False, center=False)
 
+    i = 0
     for useCase in useCaseList:
+        processPercent = round((i / len(useCaseList)) * 100, 2)
+
+        print("\r处理进度%s%%" % processPercent, end="")
+        i += 1
         project = useCase[0]
 
         module = useCase[1]
@@ -259,7 +265,7 @@ def generateCaseTable(doc, useCaseList, projectName, caseIndex1, caseIndex2):
 
         caseIndex2 += 1
         tableExplainText = '表 %s-%s %s测试用例' % (caseIndex1, caseIndex2, title)
-        print(tableExplainText)
+        # print(tableExplainText)
         docAddParagraph(doc, tableExplainText, 10, "黑体", center=True)
 
         table = createUserCaseTableWord(doc, rows, cols, title, caseNum, preCondition)
@@ -297,8 +303,8 @@ def generateWord(outWordDir, useCaseList):
     :param useCaseList:
     :return:
     """
-    if not os.path.exists(outDocDir):
-        os.makedirs(outDocDir)
+    if not os.path.exists(outWordDir):
+        os.makedirs(outWordDir)
 
     # 测试用例说明序号
     # 表 4-2后台操作日志记录动作列表
@@ -318,8 +324,6 @@ def generateWord(outWordDir, useCaseList):
 
         projectCaseList = getUseCaseByProjectName(useCaseList, projectName)
 
-        # addTableSysMenuTable(doc, projectCaseList, projectName)
-
         generateCaseTable(doc, projectCaseList, projectName, caseIndex1, caseIndex2)
 
         # doc.add_page_break()
@@ -338,26 +342,54 @@ def getUseCaseList(useCasePath):
     :return:
     """
     result = []
-    with open(useCasePath, encoding="utf8") as csvfile:
-        csv_reader = csv.reader(csvfile)  # 使用csv.reader读取csvfile中的文件
-        birth_header = next(csv_reader)  # 读取第一行每一列的标题
-        for row in csv_reader:  # 将csv 文件中的数据保存到birth_data中
-            result.append(row)
+    try:
+        with open(useCasePath, encoding="utf8") as csvfile:
+            csv_reader = csv.reader(csvfile)  # 使用csv.reader读取csvfile中的文件
+            header = next(csv_reader)  # 读取第一行每一列的标题
+            for row in csv_reader:  # 将csv 文件中的数据保存到birth_data中
+                result.append(row)
+    except Exception as e:
+        print("coding用例导出excel读取失败：" + str(e))
 
     return result
 
 
+def checkInputPath(excelPath, wordOutDir):
+    """
+    检查输入的文件路径是否存在
+    :param excelPath:
+    :param wordOutDir:
+    :return:
+    """
+    if not os.path.exists(excelPath):
+        print("用例导出excel文件不存在，请确认文件路径")
+        return False
+
+    try:
+        if not os.path.exists(wordOutDir):
+            os.makedirs(wordOutDir)
+    except:
+        print("测试用例文件夹创建失败")
+        return False
+
+    return True
+
+
 if __name__ == '__main__':
-    # 标识符	KY-04-THR 列表 防止重复
-    signalStrList = []
-    # 定义汉翻英的翻译器 标识符生成
-    translator = Translator(from_lang="chinese", to_lang="english")
+    inputArgs = sys.argv
 
     # 读取从coding上导出的csv格式的测试用例
-    excelPath = r"C:\Users\10500\Desktop\完整用例导出.csv"
+    excelPath = str(inputArgs[1])
     # 测试用例word生成文件夹
-    outDocDir = r"result2/"
-    # 读取用例excel获取用例列表
-    useCaseList = getUseCaseList(excelPath)
-    # 分析用例,生成word测试文档
-    generateWord(outDocDir, useCaseList)
+    wordOutDir = str(inputArgs[2])
+
+    if checkInputPath(excelPath, wordOutDir):
+        # 标识符	KY-04-THR 列表 防止重复
+        signalStrList = []
+        # 定义汉翻英的翻译器 标识符生成
+        translator = Translator(from_lang="chinese", to_lang="english")
+
+        # 读取用例excel获取用例列表
+        useCaseList = getUseCaseList(excelPath)
+        # 分析用例,生成word测试文档
+        generateWord(wordOutDir, useCaseList)
