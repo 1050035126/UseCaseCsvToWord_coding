@@ -11,7 +11,7 @@
      3. translate     (翻译中文到英文，用于生成英文标识符)
  ***
  
- ##使用说明：
+## 使用说明：
  
  1. 使用cmd打开命令行窗口
  2. 进入UseCaseExcelToWord_coding.py的目录，cd /UseCaseCsvToWord_coding
