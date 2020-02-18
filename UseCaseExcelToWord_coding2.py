@@ -415,9 +415,9 @@ def checkInputPath(excelPath, wordOutDir):
 
 
 if __name__ == '__main__':
-    # TODO:需要预定义模块名称的英文缩写
+    # TODO:需要预定义用例的前缀
     signalPre = "KY-04"
-
+    # TODO:定义模块名称的英文缩写
     moduleSigDic = {
         "科学运行信息与业务监管软件": {
             "触发信息管理模块": "TRIGGER",
@@ -435,9 +435,9 @@ if __name__ == '__main__':
 
     }
 
-    # 读取从coding上导出的csv格式的测试用例
+    # TODO:读取从coding上导出的csv格式的测试用例
     excelPath = r"C:\Users\10500\Desktop\新建文件夹\用例导出-20200114205831.csv"
-    # 测试用例word生成文件夹
+    # TODO:测试用例word生成文件夹
     wordOutDir = r"C:\Users\10500\Desktop\新建文件夹/"
 
     if checkInputPath(excelPath, wordOutDir):
